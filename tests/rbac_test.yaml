@@ -1,0 +1,32 @@
+suite: RBAC and ServiceAccount for Vault CSI workloads
+templates:
+  - templates/rbac-serviceaccount.yaml
+release:
+  name: release-test
+tests:
+  - it: renders nothing when SecretProviderClass is disabled
+    set:
+      ocpSecretsStoreCsiVault:
+        secretProviderClass:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: creates SA token Secret and ClusterRoleBinding when enabled
+    asserts:
+      - hasDocuments:
+          count: 3
+      - containsDocument:
+          kind: ServiceAccount
+      - containsDocument:
+          kind: Secret
+      - containsDocument:
+          kind: ClusterRoleBinding
+
+  - it: uses unique ClusterRoleBinding name derived from release
+    documentIndex: 2
+    asserts:
+      - equal:
+          path: metadata.name
+          value: release-test-openshift-sscsi-vault-tokenreview

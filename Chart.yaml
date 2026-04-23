@@ -1,0 +1,10 @@
+apiVersion: v2
+description: >-
+  Helm chart for OpenShift Secrets Store CSI Driver (Vault provider): hub Vault URL,
+  Kubernetes auth mount/role parity with openshift-external-secrets-chart patterns, and workload RBAC.
+keywords:
+  - openshift
+  - secrets-store-csi-driver
+  - vault
+name: openshift-sscsi-vault
+version: 0.1.0

@@ -1,0 +1,48 @@
+---
+# -- Settings for SecretProviderClass + workload ServiceAccount used with Vault CSI
+# @default -- see nested keys
+ocpSecretsStoreCsiVault:
+  secretProviderClass:
+    # -- Create the SecretProviderClass
+    enabled: true
+    # -- metadata.name of the SecretProviderClass (referenced from pod volumeAttributes)
+    name: vault-hub-secrets
+
+  rbac:
+    # -- Vault Kubernetes auth role name when running on the hub (or when local Vault is used)
+    rolename: "hub-role"
+    serviceAccount:
+      # -- ServiceAccount pods must use so Vault role bindings match
+      name: "ocp-sscsi-vault"
+      # -- Namespace for SA, token Secret, SecretProviderClass, and typical workloads
+      namespace: "openshift-sscsi-vault-demo"
+
+  vault:
+    # -- Vault Kubernetes auth mount path on the hub (Validated Patterns default)
+    hubMountPath: "hub"
+
+  # -- KV objects to expose as files under the CSI mount (Vault CSI `objects` list)
+  # @default -- example placeholder; replace with your paths
+  objects:
+    - objectName: "example-password"
+      secretPath: "secret/data/example/app"
+      secretKey: "password"
+
+  # -- Optional: sync mounted objects into native Kubernetes Secrets (CSI secretObjects)
+  secretObjects: []
+
+  # -- TLS options for the Vault CSI provider (see HashiCorp vault-csi-provider docs)
+  tls:
+    vaultSkipTLSVerify: "false"
+    # -- If set, passed as vaultCACertPath (must exist where the CSI provider can read it)
+    vaultCACertPath: ""
+    vaultTLSServerName: ""
+
+# -- Global values aligned with openshift-external-secrets chart patterns
+global:
+  hubClusterDomain: hub.example.com
+  clusterDomain: foo.example.com
+  localClusterDomain: ""
+
+clusterGroup:
+  applications: {}
