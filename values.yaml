@@ -3,7 +3,10 @@
 # @default -- see nested keys
 ocpSecretsStoreCsiVault:
   secretProviderClass:
-    # -- Create the SecretProviderClass
+    # -- When true, render SecretProviderClass + RBAC from this chart's templates (standalone install).
+    # Consuming charts typically set this false and use `include` on the named templates instead.
+    installDefaultManifests: false
+    # -- Create the SecretProviderClass (used by named template and by installDefaultManifests)
     enabled: true
     # -- metadata.name of the SecretProviderClass (referenced from pod volumeAttributes)
     name: vault-hub-secrets
@@ -12,12 +15,16 @@ ocpSecretsStoreCsiVault:
     # -- Vault Kubernetes auth role name when running on the hub (or when local Vault is used)
     rolename: "hub-role"
     serviceAccount:
+      # -- If false, only ClusterRoleBinding is rendered; use an existing SA (e.g. parent chart workload SA)
+      create: true
       # -- ServiceAccount pods must use so Vault role bindings match
       name: "ocp-sscsi-vault"
       # -- Namespace for SA, token Secret, SecretProviderClass, and typical workloads
       namespace: "openshift-sscsi-vault-demo"
 
   vault:
+    # -- If non-empty, used as spec.parameters.vaultAddress (e.g. https://vault.example.com for an external Vault). When empty, the default hub route https://vault-vault.<global.hubClusterDomain> is used.
+    externalAddress: ""
     # -- Vault Kubernetes auth mount path on the hub (Validated Patterns default)
     hubMountPath: "hub"
 

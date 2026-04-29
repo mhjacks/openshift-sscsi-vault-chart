@@ -19,7 +19,7 @@ helm-lint: ## Runs helm lint against the chart
 
 .PHONY: helm-unittest
 helm-unittest: ## Runs the helm unit tests
-	podman run $(PODMAN_ARGS) -v $(PWD):/apps:rw -w /apps $(HELM_UNITTEST_IMAGE) .
+	podman run $(PODMAN_ARGS) -v $(PWD):/apps:rw,Z -w /apps $(HELM_UNITTEST_IMAGE) .
 
 .PHONY: helm-docs
 helm-docs: ## Generates README.md from values.yaml

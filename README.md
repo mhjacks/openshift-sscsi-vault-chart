@@ -1,8 +1,8 @@
 # openshift-sscsi-vault
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square)
+![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square)
 
-Helm chart for OpenShift Secrets Store CSI Driver (Vault provider): hub Vault URL, Kubernetes auth mount/role parity with openshift-external-secrets-chart patterns, and workload RBAC.
+Helm chart (library-style) for Vault Secrets Store CSI on OpenShift: hub Vault URL, Kubernetes auth mount/role parity with openshift-external-secrets-chart patterns, and workload RBAC. Consuming charts should render named templates via include (see README); optional bundled manifests are off by default.
 
 This chart is used by the Validated Patterns to configure SSCSI
 
@@ -15,13 +15,16 @@ This chart is used by the Validated Patterns to configure SSCSI
 | ocpSecretsStoreCsiVault | object | see nested keys | Settings for SecretProviderClass + workload ServiceAccount used with Vault CSI |
 | ocpSecretsStoreCsiVault.objects | list | example placeholder; replace with your paths | KV objects to expose as files under the CSI mount (Vault CSI `objects` list) |
 | ocpSecretsStoreCsiVault.rbac.rolename | string | `"hub-role"` | Vault Kubernetes auth role name when running on the hub (or when local Vault is used) |
+| ocpSecretsStoreCsiVault.rbac.serviceAccount.create | bool | `true` | If false, only ClusterRoleBinding is rendered; use an existing SA (e.g. parent chart workload SA) |
 | ocpSecretsStoreCsiVault.rbac.serviceAccount.name | string | `"ocp-sscsi-vault"` | ServiceAccount pods must use so Vault role bindings match |
 | ocpSecretsStoreCsiVault.rbac.serviceAccount.namespace | string | `"openshift-sscsi-vault-demo"` | Namespace for SA, token Secret, SecretProviderClass, and typical workloads |
 | ocpSecretsStoreCsiVault.secretObjects | list | `[]` | Optional: sync mounted objects into native Kubernetes Secrets (CSI secretObjects) |
-| ocpSecretsStoreCsiVault.secretProviderClass.enabled | bool | `true` | Create the SecretProviderClass |
+| ocpSecretsStoreCsiVault.secretProviderClass.enabled | bool | `true` | Create the SecretProviderClass (used by named template and by installDefaultManifests) |
+| ocpSecretsStoreCsiVault.secretProviderClass.installDefaultManifests | bool | `false` | When true, render SecretProviderClass + RBAC from this chart's templates (standalone install). Consuming charts typically set this false and use `include` on the named templates instead. |
 | ocpSecretsStoreCsiVault.secretProviderClass.name | string | `"vault-hub-secrets"` | metadata.name of the SecretProviderClass (referenced from pod volumeAttributes) |
 | ocpSecretsStoreCsiVault.tls | object | `{"vaultCACertPath":"","vaultSkipTLSVerify":"false","vaultTLSServerName":""}` | TLS options for the Vault CSI provider (see HashiCorp vault-csi-provider docs) |
 | ocpSecretsStoreCsiVault.tls.vaultCACertPath | string | `""` | If set, passed as vaultCACertPath (must exist where the CSI provider can read it) |
+| ocpSecretsStoreCsiVault.vault.externalAddress | string | `""` | If non-empty, used as spec.parameters.vaultAddress (e.g. https://vault.example.com for an external Vault). When empty, the default hub route https://vault-vault.<global.hubClusterDomain> is used. |
 | ocpSecretsStoreCsiVault.vault.hubMountPath | string | `"hub"` | Vault Kubernetes auth mount path on the hub (Validated Patterns default) |
 
 ----------------------------------------------
