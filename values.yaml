@@ -28,6 +28,25 @@ ocpSecretsStoreCsiVault:
     # -- Vault Kubernetes auth mount path on the hub (Validated Patterns default)
     hubMountPath: "hub"
 
+  # -- Mirrors openshift-external-secrets-chart `ocpExternalSecrets.caProvider`: when enabled and `tls.vaultCACertPath` is empty, `vaultCACertPath` defaults per hub vs spoke (same branching as ESO). CSI reads a PEM path on the Vault CSI provider pod; `defaultVaultCACertPath` should match where you mount the same trust material as the type/name/key/namespace objects below.
+  # @default -- see nested keys
+  caProvider:
+    # -- When false, `vaultCACertPath` is omitted unless `tls.vaultCACertPath` is set (same idea as ESO omitting `caProvider` when disabled).
+    enabled: true
+    hostCluster:
+      type: ConfigMap
+      name: kube-root-ca.crt
+      key: ca.crt
+      namespace: external-secrets
+      # -- PEM path on the Vault CSI provider when hub-style auth (hub cluster or spoke with hashicorp-vault app)
+      defaultVaultCACertPath: /etc/pki/vault-ca/kube-root-ca.crt
+    clientCluster:
+      type: Secret
+      name: hub-ca
+      key: hub-kube-root-ca.crt
+      namespace: external-secrets
+      defaultVaultCACertPath: /etc/pki/vault-ca/hub-kube-root-ca.crt
+
   # -- KV objects to expose as files under the CSI mount (Vault CSI `objects` list)
   # @default -- example placeholder; replace with your paths
   objects:
@@ -41,7 +60,7 @@ ocpSecretsStoreCsiVault:
   # -- TLS options for the Vault CSI provider (see HashiCorp vault-csi-provider docs)
   tls:
     vaultSkipTLSVerify: "false"
-    # -- If set, passed as vaultCACertPath (must exist where the CSI provider can read it)
+    # -- If set, passed as vaultCACertPath (must exist where the CSI provider can read it). When empty and `caProvider.enabled`, defaults to `caProvider.hostCluster.defaultVaultCACertPath` or `caProvider.clientCluster.defaultVaultCACertPath` by hub/spoke (mirrors ESO caProvider branch).
     vaultCACertPath: ""
     vaultTLSServerName: ""
 

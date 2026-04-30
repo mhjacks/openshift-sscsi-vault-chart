@@ -75,8 +75,21 @@ spec:
     vaultAddress: "https://vault-vault.{{ .Values.global.hubClusterDomain }}"
 {{- end }}
     vaultSkipTLSVerify: {{ .Values.ocpSecretsStoreCsiVault.tls.vaultSkipTLSVerify | quote }}
-{{- if .Values.ocpSecretsStoreCsiVault.tls.vaultCACertPath }}
-    vaultCACertPath: {{ .Values.ocpSecretsStoreCsiVault.tls.vaultCACertPath | quote }}
+{{- $tls := .Values.ocpSecretsStoreCsiVault.tls }}
+{{- $explicitCACert := $tls.vaultCACertPath | default "" | trim }}
+{{- $cap := .Values.ocpSecretsStoreCsiVault.caProvider | default dict }}
+{{- $capEnabled := true }}
+{{- if and $cap (hasKey $cap "enabled") }}
+{{- $capEnabled = $cap.enabled }}
+{{- end }}
+{{- $effCACert := $explicitCACert }}
+{{- if and (eq $effCACert "") $capEnabled }}
+{{- $hc := $cap.hostCluster | default dict }}
+{{- $cc := $cap.clientCluster | default dict }}
+{{- $effCACert = ternary (($hc.defaultVaultCACertPath | default "/etc/pki/vault-ca/kube-root-ca.crt") | trim) (($cc.defaultVaultCACertPath | default "/etc/pki/vault-ca/hub-kube-root-ca.crt") | trim) $isHubStyleAuth }}
+{{- end }}
+{{- if ne $effCACert "" }}
+    vaultCACertPath: {{ $effCACert | quote }}
 {{- end }}
 {{- if .Values.ocpSecretsStoreCsiVault.tls.vaultTLSServerName }}
     vaultTLSServerName: {{ .Values.ocpSecretsStoreCsiVault.tls.vaultTLSServerName | quote }}

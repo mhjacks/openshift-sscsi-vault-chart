@@ -17,6 +17,9 @@ This chart is used by the Validated Patterns to configure SSCSI
 | clusterGroup.applications | object | `{}` |  |
 | global | object | `{"clusterDomain":"foo.example.com","hubClusterDomain":"hub.example.com","localClusterDomain":""}` | Global values aligned with openshift-external-secrets chart patterns |
 | ocpSecretsStoreCsiVault | object | see nested keys | Settings for SecretProviderClass + workload ServiceAccount used with Vault CSI |
+| ocpSecretsStoreCsiVault.caProvider | object | see nested keys | Mirrors openshift-external-secrets-chart `ocpExternalSecrets.caProvider`: when enabled and `tls.vaultCACertPath` is empty, `vaultCACertPath` defaults per hub vs spoke (same branching as ESO). CSI reads a PEM path on the Vault CSI provider pod; `defaultVaultCACertPath` should match where you mount the same trust material as the type/name/key/namespace objects below. |
+| ocpSecretsStoreCsiVault.caProvider.enabled | bool | `true` | When false, `vaultCACertPath` is omitted unless `tls.vaultCACertPath` is set (same idea as ESO omitting `caProvider` when disabled). |
+| ocpSecretsStoreCsiVault.caProvider.hostCluster.defaultVaultCACertPath | string | `"/etc/pki/vault-ca/kube-root-ca.crt"` | PEM path on the Vault CSI provider when hub-style auth (hub cluster or spoke with hashicorp-vault app) |
 | ocpSecretsStoreCsiVault.objects | list | example placeholder; replace with your paths | KV objects to expose as files under the CSI mount (Vault CSI `objects` list) |
 | ocpSecretsStoreCsiVault.rbac.rolename | string | `"hub-role"` | Vault Kubernetes auth role name when running on the hub (or when local Vault is used) |
 | ocpSecretsStoreCsiVault.rbac.serviceAccount.create | bool | `true` | If false, only ClusterRoleBinding is rendered; use an existing SA (e.g. parent chart workload SA) |
@@ -27,7 +30,7 @@ This chart is used by the Validated Patterns to configure SSCSI
 | ocpSecretsStoreCsiVault.secretProviderClass.installDefaultManifests | bool | `false` | When true, render SecretProviderClass + RBAC from this chart's templates (standalone install). Consuming charts typically set this false and use `include` on the named templates instead. |
 | ocpSecretsStoreCsiVault.secretProviderClass.name | string | `"vault-hub-secrets"` | metadata.name of the SecretProviderClass (referenced from pod volumeAttributes) |
 | ocpSecretsStoreCsiVault.tls | object | `{"vaultCACertPath":"","vaultSkipTLSVerify":"false","vaultTLSServerName":""}` | TLS options for the Vault CSI provider (see HashiCorp vault-csi-provider docs) |
-| ocpSecretsStoreCsiVault.tls.vaultCACertPath | string | `""` | If set, passed as vaultCACertPath (must exist where the CSI provider can read it) |
+| ocpSecretsStoreCsiVault.tls.vaultCACertPath | string | `""` | If set, passed as vaultCACertPath (must exist where the CSI provider can read it). When empty and `caProvider.enabled`, defaults to `caProvider.hostCluster.defaultVaultCACertPath` or `caProvider.clientCluster.defaultVaultCACertPath` by hub/spoke (mirrors ESO caProvider branch). |
 | ocpSecretsStoreCsiVault.vault.externalAddress | string | `""` | If non-empty, used as spec.parameters.vaultAddress (e.g. https://vault.example.com for an external Vault). When empty, the default hub route https://vault-vault.<global.hubClusterDomain> is used. |
 | ocpSecretsStoreCsiVault.vault.hubMountPath | string | `"hub"` | Vault Kubernetes auth mount path on the hub (Validated Patterns default) |
 
