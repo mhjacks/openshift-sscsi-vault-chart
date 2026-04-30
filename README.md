@@ -10,7 +10,6 @@ This chart is used by the Validated Patterns to configure SSCSI
 
 * v0.0.2: Initial release
 * v0.0.3: Provide default CAs to avoid skipping TLS verify
-* v0.0.9: Normalize `vaultSkipTLSVerify` to `"true"`/`"false"` strings for HashiCorp vault-csi-provider (`strconv.ParseBool`)
 
 ## Values
 
