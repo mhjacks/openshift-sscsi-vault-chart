@@ -33,6 +33,20 @@ ocpSecretsStoreCsiVault:
   caProvider:
     # -- When false, `vaultCACertPath` is omitted unless `tls.vaultCACertPath` is set (same idea as ESO omitting `caProvider` when disabled).
     enabled: true
+    # -- When true, Helm `lookup` copies CA PEM from cluster objects (ESO parity + hub ingress router-ca) into a ConfigMap in `targetNamespace`. You must mount that ConfigMap on the Vault CSI provider DaemonSet at `mountDir` (items key = `keyInConfigMap`). Preset `auto`: hub-style uses openshift-ingress/router-ca for *.apps; spoke uses Secret hub-ca (ESO clientCluster).
+    syncProviderCaConfigMap:
+      enabled: false
+      # Namespace where the Vault CSI provider pod runs (pattern: vault). Must allow the aap-config release SA to create ConfigMaps here, or sync out-of-band.
+      targetNamespace: vault
+      # Stable default so the hashicorp-vault chart can mount this name without coupling to another release's Helm fullname.
+      configMapName: openshift-sscsi-vault-vault-tls-ca
+      mountDir: /etc/pki/vault-ca
+      keyInConfigMap: vault-tls-ca.pem
+      preset: auto
+      ingressRouterCa:
+        namespace: openshift-ingress
+        name: router-ca
+        key: ca-bundle.crt
     hostCluster:
       type: ConfigMap
       name: kube-root-ca.crt

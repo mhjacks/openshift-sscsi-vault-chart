@@ -1,6 +1,6 @@
 # openshift-sscsi-vault
 
-![Version: 0.0.10](https://img.shields.io/badge/Version-0.0.10-informational?style=flat-square)
+![Version: 0.0.11](https://img.shields.io/badge/Version-0.0.11-informational?style=flat-square)
 
 Helm chart (library-style) for Vault Secrets Store CSI on OpenShift: hub Vault URL, Kubernetes auth mount/role parity with openshift-external-secrets-chart patterns, and workload RBAC. Consuming charts should render named templates via include (see README); optional bundled manifests are off by default.
 
@@ -10,6 +10,7 @@ This chart is used by the Validated Patterns to configure SSCSI
 
 * v0.0.2: Initial release
 * v0.0.3: Provide default CAs to avoid skipping TLS verify
+* v0.0.11: Handle injection of CA material
 
 ## Values
 
@@ -21,6 +22,7 @@ This chart is used by the Validated Patterns to configure SSCSI
 | ocpSecretsStoreCsiVault.caProvider | object | see nested keys | Mirrors openshift-external-secrets-chart `ocpExternalSecrets.caProvider`: when enabled and `tls.vaultCACertPath` is empty, `vaultCACertPath` defaults per hub vs spoke (same branching as ESO). CSI reads a PEM path on the Vault CSI provider pod; `defaultVaultCACertPath` should match where you mount the same trust material as the type/name/key/namespace objects below. |
 | ocpSecretsStoreCsiVault.caProvider.enabled | bool | `true` | When false, `vaultCACertPath` is omitted unless `tls.vaultCACertPath` is set (same idea as ESO omitting `caProvider` when disabled). |
 | ocpSecretsStoreCsiVault.caProvider.hostCluster.defaultVaultCACertPath | string | `"/etc/pki/vault-ca/kube-root-ca.crt"` | PEM path on the Vault CSI provider when hub-style auth (hub cluster or spoke with hashicorp-vault app) |
+| ocpSecretsStoreCsiVault.caProvider.syncProviderCaConfigMap | object | `{"configMapName":"openshift-sscsi-vault-vault-tls-ca","enabled":false,"ingressRouterCa":{"key":"ca-bundle.crt","name":"router-ca","namespace":"openshift-ingress"},"keyInConfigMap":"vault-tls-ca.pem","mountDir":"/etc/pki/vault-ca","preset":"auto","targetNamespace":"vault"}` | When true, Helm `lookup` copies CA PEM from cluster objects (ESO parity + hub ingress router-ca) into a ConfigMap in `targetNamespace`. You must mount that ConfigMap on the Vault CSI provider DaemonSet at `mountDir` (items key = `keyInConfigMap`). Preset `auto`: hub-style uses openshift-ingress/router-ca for *.apps; spoke uses Secret hub-ca (ESO clientCluster). |
 | ocpSecretsStoreCsiVault.objects | list | example placeholder; replace with your paths | KV objects to expose as files under the CSI mount (Vault CSI `objects` list) |
 | ocpSecretsStoreCsiVault.rbac.rolename | string | `"hub-role"` | Vault Kubernetes auth role name when running on the hub (or when local Vault is used) |
 | ocpSecretsStoreCsiVault.rbac.serviceAccount.create | bool | `true` | If false, only ClusterRoleBinding is rendered; use an existing SA (e.g. parent chart workload SA) |

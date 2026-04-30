@@ -94,9 +94,18 @@ spec:
 {{- if and $cap (hasKey $cap "enabled") }}
 {{- $capEnabled = $cap.enabled }}
 {{- end }}
+{{- $sync := $cap.syncProviderCaConfigMap | default dict }}
 {{- $effCACert := $explicitCACert }}
 {{- if ne $vaultTlsSkip "true" }}
-{{- if and (eq $effCACert "") $capEnabled }}
+{{- if and (eq $effCACert "") (default false $sync.enabled) }}
+{{- $pem := trim (include "openshift_sscsi_vault.vaultTlsCaPemFromCluster" .) }}
+{{- if ne $pem "" }}
+{{- $mountDir := $sync.mountDir | default "/etc/pki/vault-ca" | trim }}
+{{- $keyFile := $sync.keyInConfigMap | default "vault-tls-ca.pem" | trim }}
+{{- $effCACert = printf "%s/%s" $mountDir $keyFile }}
+{{- end }}
+{{- end }}
+{{- if and (eq $effCACert "") $capEnabled (not (default false $sync.enabled)) }}
 {{- $hc := $cap.hostCluster | default dict }}
 {{- $cc := $cap.clientCluster | default dict }}
 {{- $effCACert = ternary (($hc.defaultVaultCACertPath | default "/etc/pki/vault-ca/kube-root-ca.crt") | trim) (($cc.defaultVaultCACertPath | default "/etc/pki/vault-ca/hub-kube-root-ca.crt") | trim) $isHubStyleAuth }}
