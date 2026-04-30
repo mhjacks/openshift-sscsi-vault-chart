@@ -74,7 +74,19 @@ spec:
 {{- else }}
     vaultAddress: "https://vault-vault.{{ .Values.global.hubClusterDomain }}"
 {{- end }}
-    vaultSkipTLSVerify: {{ .Values.ocpSecretsStoreCsiVault.tls.vaultSkipTLSVerify | quote }}
+{{- $vaultTlsSkip := .Values.ocpSecretsStoreCsiVault.tls.vaultSkipTLSVerify | toString | trim | lower }}
+{{- if eq $vaultTlsSkip "true" }}
+{{- $vaultTlsSkip = "true" }}
+{{- else if eq $vaultTlsSkip "false" }}
+{{- $vaultTlsSkip = "false" }}
+{{- else if eq $vaultTlsSkip "1" }}
+{{- $vaultTlsSkip = "true" }}
+{{- else if eq $vaultTlsSkip "0" }}
+{{- $vaultTlsSkip = "false" }}
+{{- else }}
+{{- $vaultTlsSkip = "false" }}
+{{- end }}
+    vaultSkipTLSVerify: {{ $vaultTlsSkip | quote }}
 {{- $tls := .Values.ocpSecretsStoreCsiVault.tls }}
 {{- $explicitCACert := $tls.vaultCACertPath | default "" | trim }}
 {{- $cap := .Values.ocpSecretsStoreCsiVault.caProvider | default dict }}
