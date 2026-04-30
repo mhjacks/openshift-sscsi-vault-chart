@@ -57,10 +57,10 @@ ocpSecretsStoreCsiVault:
   # -- Optional: sync mounted objects into native Kubernetes Secrets (CSI secretObjects)
   secretObjects: []
 
-  # -- TLS options for the Vault CSI provider (see HashiCorp vault-csi-provider docs)
+  # -- TLS options for the Vault CSI provider (see HashiCorp vault-csi-provider docs). When `vaultSkipTLSVerify` is `"true"`, `vaultCACertPath` is not emitted (verify is off).
   tls:
     vaultSkipTLSVerify: "false"
-    # -- If set, passed as vaultCACertPath (must exist where the CSI provider can read it). When empty and `caProvider.enabled`, defaults to `caProvider.hostCluster.defaultVaultCACertPath` or `caProvider.clientCluster.defaultVaultCACertPath` by hub/spoke (mirrors ESO caProvider branch).
+    # -- If set, passed as vaultCACertPath (must exist where the CSI provider can read it). When empty and `caProvider.enabled`, defaults to `caProvider.hostCluster.defaultVaultCACertPath` or `caProvider.clientCluster.defaultVaultCACertPath` by hub/spoke (mirrors ESO ClusterSecretStore caProvider branch).
     vaultCACertPath: ""
     vaultTLSServerName: ""
 

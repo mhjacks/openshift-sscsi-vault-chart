@@ -95,6 +95,7 @@ spec:
 {{- $capEnabled = $cap.enabled }}
 {{- end }}
 {{- $effCACert := $explicitCACert }}
+{{- if ne $vaultTlsSkip "true" }}
 {{- if and (eq $effCACert "") $capEnabled }}
 {{- $hc := $cap.hostCluster | default dict }}
 {{- $cc := $cap.clientCluster | default dict }}
@@ -102,6 +103,7 @@ spec:
 {{- end }}
 {{- if ne $effCACert "" }}
     vaultCACertPath: {{ $effCACert | quote }}
+{{- end }}
 {{- end }}
 {{- if .Values.ocpSecretsStoreCsiVault.tls.vaultTLSServerName }}
     vaultTLSServerName: {{ .Values.ocpSecretsStoreCsiVault.tls.vaultTLSServerName | quote }}
