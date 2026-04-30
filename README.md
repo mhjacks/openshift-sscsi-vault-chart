@@ -1,6 +1,6 @@
 # openshift-sscsi-vault
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square)
+![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square)
 
 Helm chart (library-style) for Vault Secrets Store CSI on OpenShift: hub Vault URL, Kubernetes auth mount/role parity with openshift-external-secrets-chart patterns, and workload RBAC. Consuming charts should render named templates via include (see README); optional bundled manifests are off by default.
 
@@ -9,6 +9,7 @@ This chart is used by the Validated Patterns to configure SSCSI
 ### Notable changes
 
 * v0.0.2: Initial release
+* v0.0.3: Provide default CAs to avoid skipping TLS verify
 
 ## Values
 
